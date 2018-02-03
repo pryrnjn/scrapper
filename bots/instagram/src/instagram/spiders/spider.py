@@ -17,11 +17,11 @@ class InstagramSpider(Spider):
 
     HEADERS = ['user', 'link', 'posted_at', 'score']
     UNIQUE_KEY = ['link']
-    data_file = "/home/pryrnjn/workspace/scrapper/data/instagram/instagram.csv"
+    data_file = "/home/ubuntu/scrapper/data/instagram/instagram.csv"
 
     def __init__(self, *args, **kwargs):
         super(InstagramSpider, self).__init__(*args, **kwargs)
-        self.driver = get_chrome_browser(False, 5)
+        self.driver = get_chrome_browser(True, 5)
         self.max_count = 10
         self.requests_processed = dict()
         self.loaded = dict()
