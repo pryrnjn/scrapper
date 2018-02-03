@@ -17,6 +17,7 @@ class InstagramSpider(Spider):
 
     HEADERS = ['user', 'link', 'posted_at', 'score']
     UNIQUE_KEY = ['link']
+    data_file = "/home/pryrnjn/workspace/scrapper/data/instagram/instagram.csv"
 
     def __init__(self, *args, **kwargs):
         super(InstagramSpider, self).__init__(*args, **kwargs)
@@ -25,7 +26,7 @@ class InstagramSpider(Spider):
         self.requests_processed = dict()
         self.loaded = dict()
         import csv
-        with open("/home/pryrnjn/workspace/sdlc/bots/instagram/instagram_20180126_070846.csv", 'rb') as csv_file:
+        with open(self.data_file, 'rb') as csv_file:
             reader = csv.reader(csv_file)
             header = reader.next()
             for row in reader:
