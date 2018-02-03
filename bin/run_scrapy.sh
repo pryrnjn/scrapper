@@ -13,6 +13,7 @@ file_type="$3"
 . scrapy.properties
 
 export PYTHONPATH="${PYTHONPATH}:${BLZ_PROJ_DIR}/"
+export PYTHONPATH="${PYTHONPATH}:${BLZ_PROJ_DIR}/lib"
 spider_location="${BLZ_BOT_DIR}/${spider_name}/src"
 log_file="${BLZ_LOG_DIR}/${spider_name}.log"
 
