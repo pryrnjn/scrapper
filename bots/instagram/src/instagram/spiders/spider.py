@@ -31,11 +31,6 @@ class InstagramSpider(Spider):
             header = reader.next()
             for row in reader:
                 self.loaded[row[1]] = row
-                # with open("/home/pryrnjn/workspace/sdlc/bots/instagram/instagram_20180126_070846.csv", 'wb') as csv_file:
-                #     writer = csv.writer(csv_file)
-                #     writer.writerow(header)
-                #     for row in self.loaded.values():
-                #         writer.writerow(row)
 
     def __del__(self):
         self.driver.quit()
@@ -139,15 +134,16 @@ class InstagramSpider(Spider):
                 for link_obj in links:
                     link = link_obj.get_attribute('href')
                     matched = re.match('https://www.instagram.com/p/\\w+/', link)
-                    if matched and matched.group() not in self.loaded:
-                        item = InstagramItem()
-                        item['user'] = user
-                        item['link'] = matched.group()
-
-                        item["posted_at"] = self.get_posted_at_time(link_obj)
-                        item['score'] = 10
+                    if matched and matched.group():
                         num_posts -= 1
-                        yield item
+                        if not in self.loaded:
+                            item = InstagramItem()
+                            item['user'] = user
+                            item['link'] = matched.group()
+                            item["posted_at"] = self.get_posted_at_time(link_obj)
+                            item['score'] = 10
+                            self.loaded[item['link']] = []
+                            yield item
 
                 try:
                     scroll_to_end(self.driver)
