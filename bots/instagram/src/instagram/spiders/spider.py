@@ -134,9 +134,9 @@ class InstagramSpider(Spider):
                 for link_obj in links:
                     link = link_obj.get_attribute('href')
                     matched = re.match('https://www.instagram.com/p/\\w+/', link)
-                    if matched and matched.group():
+                    if matched:
                         num_posts -= 1
-                        if not in self.loaded:
+                        if matched.group() not in self.loaded:
                             item = InstagramItem()
                             item['user'] = user
                             item['link'] = matched.group()
