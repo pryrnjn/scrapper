@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 
 lib_path = abspath(join(dirname(__file__), "..", "..", "lib"))
 
-CHROME_WEB_DRIVER_PATH = join("/home/scrapper/lib", "chromedriver")
+CHROME_WEB_DRIVER_PATH = join("/home/ubuntu/scrapper/lib", "chromedriver")
 PHANTOM_WEB_DRIVER_PATH = join(lib_path, "phantomjs-1.9.7-linux-x86_64/bin/phantomjs")
 
 
