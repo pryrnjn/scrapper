@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 
 lib_path = abspath(join(dirname(__file__), "..", "..", "lib"))
 
-CHROME_WEB_DRIVER_PATH = join(lib_path, "chromedriver")
+CHROME_WEB_DRIVER_PATH = join("/home/scrapper/lib", "chromedriver")
 PHANTOM_WEB_DRIVER_PATH = join(lib_path, "phantomjs-1.9.7-linux-x86_64/bin/phantomjs")
 
 
@@ -20,7 +20,7 @@ def get_chrome_browser(headless=True, implicit_wait_time=10):
     # options.add_argument('window-size=1200x600')
     if headless:
         options.add_argument('headless')
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Chrome(CHROME_WEB_DRIVER_PATH, chrome_options=options)
     driver.implicitly_wait(implicit_wait_time)
     # driver.maximize_window()
     return driver
