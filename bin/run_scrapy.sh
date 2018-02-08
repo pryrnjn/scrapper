@@ -15,6 +15,8 @@ properties_file="$4"
 . "$properties_file"
 
 export PYTHONPATH="${PYTHONPATH}:${BLZ_PROJ_DIR}/"
+export PATH="${PATH}:${BLZ_PROJ_DIR}/lib/chromedriver"
+
 spider_location="${BLZ_BOT_DIR}/${spider_name}/src"
 log_file="${BLZ_LOG_DIR}/${spider_name}.log"
 
