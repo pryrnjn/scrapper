@@ -42,7 +42,6 @@ class InstagramSpider(Spider):
             return False
 
     def parse(self, response):
-        pass
         self.login()
         self.driver.get("https://www.instagram.com/thegreatfollowr/")
         following_link = self.driver.find_elements_by_xpath('.//article[@class="_mesn5"]//ul/li')[
@@ -72,8 +71,6 @@ class InstagramSpider(Spider):
             pass
         finally:
             self.dismiss_dialog_if_any()
-        for row in self.loaded.values():
-            yield InstagramItem(user=row[0], link=row[1], posted_at=row[2], score=row[3])
 
         for link in links_to_follow:
             for item_or_request in self.parse_items(link):
@@ -141,7 +138,6 @@ class InstagramSpider(Spider):
                             item['link'] = matched.group()
                             item["posted_at"] = posted_at
                             item['score'] = 10
-                            self.loaded[item['link']] = []
                             yield item
 
                 try:
@@ -151,7 +147,12 @@ class InstagramSpider(Spider):
                     pass
 
     def get_posted_at_time(self, element):
-        click_element_using_key(element)
-        posted_at = self.driver.find_element_by_tag_name("time").get_attribute("datetime")
-        self.dismiss_dialog_if_any()
+        posted_at = ''
+        try:
+            click_element_using_key(element)
+            posted_at = self.driver.find_element_by_tag_name("time").get_attribute("datetime")
+        except:
+            pass
+        finally:
+            self.dismiss_dialog_if_any()
         return posted_at
