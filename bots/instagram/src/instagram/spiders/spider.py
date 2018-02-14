@@ -17,7 +17,8 @@ class InstagramSpider(Spider):
 
     HEADERS = ['user', 'link', 'posted_at', 'score']
     UNIQUE_KEY = ['link']
-    data_file = "/home/ubuntu/scrapper/data/instagram/instagram.csv"
+    data_dir = "/home/ubuntu/scrapper/data/instagram/"
+    data_file = data_dir + "instagram.csv"
 
     def __init__(self, *args, **kwargs):
         super(InstagramSpider, self).__init__(*args, **kwargs)
@@ -26,15 +27,10 @@ class InstagramSpider(Spider):
         self.requests_processed = dict()
         self.loaded = dict()
         import csv
-        with open(self.data_file, 'rb') as csv_file:
+        with open(self.data_dir + 'visited.csv', 'rb') as csv_file:
             reader = csv.reader(csv_file)
-            header = reader.next()
             for row in reader:
-                self.loaded[row[1]] = row
-
-    def __del__(self):
-        self.driver.quit()
-        Spider.__del__(self)
+                self.loaded[row[0]] = row[1]
 
     def if_request_processed(self, url):
         # TODO: this only validates based on the url-hash, doesn't take care of other parameters of a Request,
@@ -46,6 +42,7 @@ class InstagramSpider(Spider):
             return False
 
     def parse(self, response):
+        pass
         self.login()
         self.driver.get("https://www.instagram.com/thegreatfollowr/")
         following_link = self.driver.find_elements_by_xpath('.//article[@class="_mesn5"]//ul/li')[
@@ -136,11 +133,13 @@ class InstagramSpider(Spider):
                     matched = re.match('https://www.instagram.com/p/\\w+/', link)
                     if matched:
                         num_posts -= 1
-                        if matched.group() not in self.loaded:
+                        posted_at = self.get_posted_at_time(link_obj)
+                        if posted_at > self.loaded.get(user, ''):
+                            self.loaded[user] = posted_at
                             item = InstagramItem()
                             item['user'] = user
                             item['link'] = matched.group()
-                            item["posted_at"] = self.get_posted_at_time(link_obj)
+                            item["posted_at"] = posted_at
                             item['score'] = 10
                             self.loaded[item['link']] = []
                             yield item

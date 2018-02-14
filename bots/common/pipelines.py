@@ -235,6 +235,9 @@ class CsvWriterPipeline(object):
         return item
 
     def close_spider(self, spider):
+        if spider.driver:
+            spider.driver.quit()
+
         if hasattr(spider, "data_file"):
             file_path = spider.data_file
         else:
@@ -255,6 +258,16 @@ class CsvWriterPipeline(object):
 
         logger.debug("Writing data file to %(path)r", {'path': file_path}, extra={'spider': spider})
         write_to_csv_from_json(file_path, headers, self.items)
+        # writing visited
+        with open(spider.data_dir + 'visited.csv', 'rb') as csv_file:
+            reader = csv.reader(csv_file)
+            for row in reader:
+                if row[0] not in spider.loaded:
+                    spider.loaded[row[0]] = row[1]
+        with open(spider.data_dir + 'visited.csv', 'wb') as csv_file:
+            writer = csv.writer(csv_file)
+            for user in spider.loaded:
+                writer.writerow([user, spider.loaded[user]])
 
 
 class DuplicateItemFilter(object):
