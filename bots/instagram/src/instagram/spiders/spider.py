@@ -22,7 +22,7 @@ class InstagramSpider(Spider):
 
     def __init__(self, *args, **kwargs):
         super(InstagramSpider, self).__init__(*args, **kwargs)
-        self.driver = get_chrome_browser(True, 5)
+        self.driver = get_chrome_browser(False, 5)
         self.max_count = 10
         self.requests_processed = dict()
         self.loaded = dict()
@@ -103,48 +103,58 @@ class InstagramSpider(Spider):
             pass
 
     def parse_items(self, url):
-        matched = re.match('(https://www.instagram.com/)(\\w+)(/)', url)
-        if matched:
-            user = matched.groups()[1]
-            self.driver.get(url)
-            try:
-                name = self.driver.find_element_by_xpath('.//div[@class="_tb97a"]/h1').text
-            except NoSuchElementException:
-                name = ''
-            num_posts = int(
-                self.driver.find_element_by_xpath('.//article[@class="_mesn5"]//ul/li[1]/span/span').text.replace(",",
-                                                                                                                  ""))
-            num_posts = min(num_posts, self.max_count)
-            loaded_links = set()
-            tries = 1
-            while num_posts > 0:
-                links = set(self.driver.find_elements_by_xpath('.//a')) - loaded_links
-                if len(links - loaded_links) == 0:
-                    if tries > 3:
-                        break
-                    tries += 1
-
-                loaded_links.update(links)
-                for link_obj in links:
-                    link = link_obj.get_attribute('href')
-                    matched = re.match('https://www.instagram.com/p/\\w+/', link)
-                    if matched:
-                        num_posts -= 1
-                        posted_at = self.get_posted_at_time(link_obj)
-                        if posted_at > self.loaded.get(user, ''):
-                            self.loaded[user] = posted_at
-                            item = InstagramItem()
-                            item['user'] = user
-                            item['link'] = matched.group()
-                            item["posted_at"] = posted_at
-                            item['score'] = 10
-                            yield item
-
+        try:
+            matched = re.match('(https://www.instagram.com/)(\\w+)(/)', url)
+            if matched:
+                user = matched.groups()[1]
+                self.driver.get(url)
                 try:
+                    name = self.driver.find_element_by_xpath('.//div[@class="_tb97a"]/h1').text
+                except NoSuchElementException:
+                    name = ''
+                num_posts = int(
+                    self.driver.find_element_by_xpath('.//article[@class="_mesn5"]//ul/li[1]/span/span').text.replace(
+                        ",",
+                        ""))
+                num_posts = min(num_posts, self.max_count)
+                loaded_links = set()
+                tries = 1
+                while num_posts > 0:
+                    links = self.driver.find_elements_by_xpath(
+                        ".//div[@class='_havey']/div[@class='_6d3hm _mnav9']/div[@class='_mck9w _gvoze _tn0ps']/a")
+                    # check for first post, if already scraped
+                    if self.is_already_scraped(links[0], user):
+                        break
+                    links = set(links) - loaded_links
+                    if len(links - loaded_links) == 0:
+                        if tries > 3:
+                            break
+                        tries += 1
+
+                    loaded_links.update(links)
+                    for link_obj in links:
+                        link = link_obj.get_attribute('href')
+                        matched = re.match('https://www.instagram.com/p/\\w+/', link)
+                        if matched:
+                            num_posts -= 1
+                            posted_at = self.get_posted_at_time(link_obj)
+                            if posted_at > self.loaded.get(user, ''):
+                                self.loaded[user] = posted_at
+                                item = InstagramItem()
+                                item['user'] = user
+                                item['link'] = matched.group()
+                                item["posted_at"] = posted_at
+                                item['score'] = 10
+                                yield item
+
                     scroll_to_end(self.driver)
                     time.sleep(tries)
-                except StaleElementReferenceException:
-                    pass
+        except StaleElementReferenceException:
+            print "StaleElementReferenceException. url::", url
+        except NoSuchElementException:
+            print "NoSuchElementException. url::", url
+        except Exception:
+            print "Exception. url::", url
 
     def get_posted_at_time(self, element):
         posted_at = ''
@@ -156,3 +166,12 @@ class InstagramSpider(Spider):
         finally:
             self.dismiss_dialog_if_any()
         return posted_at
+
+    def is_already_scraped(self, link_obj, user):
+        link = link_obj.get_attribute('href')
+        matched = re.match('https://www.instagram.com/p/\\w+/', link)
+        if matched:
+            posted_at = self.get_posted_at_time(link_obj)
+            if posted_at <= self.loaded.get(user, ''):
+                return True
+        return False
