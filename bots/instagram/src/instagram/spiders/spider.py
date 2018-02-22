@@ -139,13 +139,13 @@ class InstagramSpider(Spider):
                             num_posts -= 1
                             posted_at = self.get_posted_at_time(link_obj)
                             if posted_at > self.loaded.get(user, ''):
-                                self.loaded[user] = posted_at
                                 item = InstagramItem()
                                 item['user'] = user
                                 item['link'] = matched.group()
                                 item["posted_at"] = posted_at
                                 item['score'] = 10
                                 yield item
+                                self.loaded[user] = posted_at
 
                     scroll_to_end(self.driver)
                     time.sleep(tries)
