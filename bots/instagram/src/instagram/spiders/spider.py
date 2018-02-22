@@ -23,7 +23,7 @@ class InstagramSpider(Spider):
     def __init__(self, *args, **kwargs):
         super(InstagramSpider, self).__init__(*args, **kwargs)
         self.driver = get_chrome_browser(True, 5)
-        self.max_count = 30
+        self.max_count = 10
         self.requests_processed = dict()
         self.loaded = dict()
         import csv
