@@ -258,7 +258,11 @@ class CsvWriterPipeline(object):
 
         logger.debug("Writing data file to %(path)r", {'path': file_path}, extra={'spider': spider})
         write_to_csv_from_json(file_path, headers, self.items)
+
         # writing visited
+        for item in self.items:
+            if item[3] > self.loaded.get(item[0], ''):
+                spider.loaded[item[0]] = item[3]
         with open(spider.data_dir + 'visited.csv', 'rb') as csv_file:
             reader = csv.reader(csv_file)
             for row in reader:

@@ -23,7 +23,7 @@ class InstagramSpider(Spider):
     def __init__(self, *args, **kwargs):
         super(InstagramSpider, self).__init__(*args, **kwargs)
         self.driver = get_chrome_browser(True, 5)
-        self.max_count = 10
+        self.max_count = 30
         self.requests_processed = dict()
         self.loaded = dict()
         import csv
@@ -145,7 +145,6 @@ class InstagramSpider(Spider):
                                 item["posted_at"] = posted_at
                                 item['score'] = 10
                                 yield item
-                                self.loaded[user] = posted_at
 
                     scroll_to_end(self.driver)
                     time.sleep(tries)
