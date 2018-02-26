@@ -261,8 +261,8 @@ class CsvWriterPipeline(object):
 
         # writing visited
         for item in self.items:
-            if item[3] > self.loaded.get(item[0], ''):
-                spider.loaded[item[0]] = item[3]
+            if item['posted_at'] > spider.loaded.get(item['user'], ''):
+                spider.loaded[item['user']] = item['posted_at']
         with open(spider.data_dir + 'visited.csv', 'rb') as csv_file:
             reader = csv.reader(csv_file)
             for row in reader:
