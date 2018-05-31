@@ -23,7 +23,7 @@ class InstagramSpider(Spider):
     def __init__(self, *args, **kwargs):
         super(InstagramSpider, self).__init__(*args, **kwargs)
         self.driver = get_chrome_browser(True, 5)
-        self.max_count = 10
+        self.max_count = 50
         self.requests_processed = dict()
         self.loaded = dict()
         import csv
@@ -44,8 +44,7 @@ class InstagramSpider(Spider):
     def parse(self, response):
         self.login()
         self.driver.get("https://www.instagram.com/thegreatfollowr/")
-        following_link = self.driver.find_elements_by_xpath('.//article[@class="_mesn5"]//ul/li')[
-            2].find_element_by_tag_name('a')
+        following_link = self.driver.find_element_by_xpath(".//a[@href='/thegreatfollowr/following/']")
         links_to_follow = []  # ["https://www.instagram.com/playmateiryna/"]
         # parsing following links
         try:
@@ -54,7 +53,7 @@ class InstagramSpider(Spider):
             tries = 1
             loaded_divs = set()
             while True:
-                divs = set(self.driver.find_elements_by_xpath('.//div[@class="_2nunc"]')) - loaded_divs
+                divs = set(self.driver.find_elements_by_class_name("FsskP")) - loaded_divs
                 if len(divs) == 0:
                     if tries > 3:
                         break
@@ -77,20 +76,14 @@ class InstagramSpider(Spider):
                 yield item_or_request
 
     def login(self):
-        url = self.start_urls[0]
+        url = "https://www.instagram.com/accounts/login/"  # self.start_urls[0]
         username = "thegreatfollowr"
         password = "pr231158**"
         self.driver.get(url)
+        self.driver.find_element_by_name("username").send_keys(username)
+        self.driver.find_element_by_name("password").send_keys(password)
 
-        login_link = self.driver.find_element_by_xpath('.//p[@class="_g9ean"]/a')
-        scroll_to_element(self.driver, login_link)
-        # if login_link.is_displayed():
-        click_element(self.driver, login_link)
-        login_form = self.driver.find_element_by_xpath('.//form[@class="_3jvtb"]')
-        box_divs = login_form.find_elements_by_xpath('.//div[@class="_ev9xl"]')
-        box_divs[0].find_element_by_xpath('input').send_keys(username)
-        box_divs[1].find_element_by_xpath('input').send_keys(password)
-        login_btn = login_form.find_element_by_xpath('.//button[@class="_qv64e _gexxb _4tgw8 _njrw0"]')
+        login_btn = self.driver.find_element_by_class_name("_5f5mN")
         scroll_to_element(self.driver, login_btn)
         click_element(self.driver, login_btn)
         self.dismiss_dialog_if_any()
@@ -98,7 +91,7 @@ class InstagramSpider(Spider):
     def dismiss_dialog_if_any(self):
         try:
             click_element(self.driver, self.driver.find_element_by_xpath('.//div[@role="dialog"]')
-                          .find_element_by_xpath('button[@class="_dcj9f"]'))
+                          .find_element_by_xpath('button[@class="ckWGn"]'))
         except:
             pass
 
@@ -108,20 +101,19 @@ class InstagramSpider(Spider):
             if matched:
                 user = matched.groups()[1]
                 self.driver.get(url)
-                try:
-                    name = self.driver.find_element_by_xpath('.//div[@class="_tb97a"]/h1').text
-                except NoSuchElementException:
-                    name = ''
+                # try:
+                #     name = self.driver.find_element_by_xpath('.//div[@class="_tb97a"]/h1').text
+                # except NoSuchElementException:
+                #     name = ''
                 num_posts = int(
-                    self.driver.find_element_by_xpath('.//article[@class="_mesn5"]//ul/li[1]/span/span').text.replace(
+                    self.driver.find_elements_by_class_name("g47SY")[0].text.replace(
                         ",",
                         ""))
                 num_posts = min(num_posts, self.max_count)
                 loaded_links = set()
                 tries = 1
                 while num_posts > 0:
-                    links = self.driver.find_elements_by_xpath(
-                        ".//div[@class='_havey']/div[@class='_6d3hm _mnav9']/div[@class='_mck9w _gvoze _tn0ps']/a")
+                    links = self.driver.find_elements_by_xpath(".//div[@class='v1Nh3 kIKUG  _bz0w']/a")
                     # check for first post, if already scraped
                     if self.is_already_scraped(links[0], user):
                         break
